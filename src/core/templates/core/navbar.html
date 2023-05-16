@@ -1,0 +1,11 @@
+<nav class="navbar navbar-light bg-light">
+    <a class="navbar-brand px-1" href="https://golden.xyz/" target="_blank">
+        <img src="https://golden.com/static/images/b04063256d0d506a816e.png" width="30" height="30" alt="">
+        Dataset Uploader
+    </a>
+    <span class="navbar-text px-2 text-dark">
+        User : 
+        {{truncated_user_address}}
+        <a href="{% url 'logout' %}?next={% url 'moralis_auth' %}" type="button" class="text-muted btn-sm btn-outline-dark mt-2">Disconnect</a>
+    </span>
+</nav>

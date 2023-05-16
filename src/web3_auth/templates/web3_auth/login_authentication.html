@@ -1,0 +1,104 @@
+{% extends "base_login.html" %}
+{% load bootstrap5 %}
+
+
+{% block alert %}
+    {% if user.is_authenticated %}
+    <div class="alert alert-success mb-4" role="alert">
+        Connection successful!
+    </div>
+    {% else %}
+    {% endif %}
+{% endblock alert %}
+{% block button %}
+    {% if user.is_authenticated %}
+        <button class="btn btn-lg btn-secondary btn-block" id ="auth-metamask" type="button" disabled>Connected</button>
+        <div class="mb-1"></div>
+        <a href="{% url 'logout' %}?next={% url 'moralis_auth' %}" type="button" class="text-muted btn btn-outline-dark mt-2">Disconnect</a>
+        <a href="{% url 'core:index' %}" type="button" class="btn btn-primary btn-block mt-2">Proceed</a>
+    {% else %}
+        <button class="btn btn-lg btn-primary btn-block" id ="auth-metamask" type="button">Connect wallet</button>
+    {% endif %}
+{% endblock button %}
+{% block proceedbutton %}
+{% endblock proceedbutton %}
+{% block script %}
+    {% if user.is_authenticated %}
+    {% else %}
+        <script>
+            const elBtnMetamask = document.getElementById('auth-metamask');
+            const handleApiPost = async (endpoint, params) => {
+            const result = await axios.post(`${endpoint}`, params, {
+                headers: {
+                'Content-Type': 'application/json',
+                "X-CSRFToken": '{{ csrf_token }}'
+                },
+            });
+
+            return result.data;
+            };
+
+            const requestMessage = (account, chain) =>
+                handleApiPost('{% url "request_message" %}', {
+                    address: account,
+                    chain: chain,
+                    network: 'evm',
+                });
+
+            const verifyMessage = (message, signature) =>
+                handleApiPost('{% url "verify_message" %}', {
+                    message,
+                    signature,
+                    network: 'evm',
+                });
+
+            const connectToMetamask = async () => {
+                const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+
+                const [accounts, chainId] = await Promise.all([
+                    provider.send('eth_requestAccounts', []),
+                    provider.send('eth_chainId', []),
+                ]);
+
+                const signer = provider.getSigner();
+                return { signer, chain: chainId, account: accounts[0] };
+                };
+
+            const handleAuth = async () => {
+                // Connect to Metamask
+                const { signer, chain, account } = await connectToMetamask();
+                console.log("account", account, "chain", chain)
+
+                if (!account) {
+                    throw new Error('No account found');
+                }
+                if (!chain) {
+                    throw new Error('No chain found');
+                }
+
+                const { message } = await requestMessage(account, chain);
+                const signature = await signer.signMessage(message);
+                const { user } = await verifyMessage(message, signature);
+                console.log(user)
+                if (user) {
+                    location.reload();
+                }
+                else{
+                    alert("authentication error")
+                }
+                };
+
+            function init() {
+                elBtnMetamask.addEventListener('click', async () => {
+                    handleAuth().catch((error) => console.log(error));
+                });
+                }
+
+            window.addEventListener('load', () => {
+                init();
+                });
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    {% endif %}
+{% endblock script %}

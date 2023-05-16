@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load bootstrap5 %}
+{% block title %}
+    Index 
+{% endblock title %}
+{% block navbar %}
+    {% include 'core/navbar.html' %}
+{% endblock navbar %}
+{% block content %}
+    <div class = "top-0 w-100 p-15" style="max-width:330px">
+        <h1>Index</h1>
+        <a href="none" type="button" class="btn disabled btn-primary btn-block mt-2" id='PreviousUploadsButton'>Previous uploads</a>
+        <a href="{% url 'core:upload_page' %}" type="button" class="btn disabled btn-primary btn-block mt-2" id='UploadButton'>Upload Data</a>
+        <div class="mt-5">
+            <p>Sign in to connect to the Golden API. Make sure you've created an account on Golden.com with the same wallet first!</p>
+            <button class="btn btn-lg btn-primary btn-block" id ="auth-godel" type="button">Connect to the Golden API</button>
+        </div>
+    </div>
+{% endblock content %}
+{% block script %}
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <script>
+
+        const GodelAuthBtn = document.getElementById('auth-godel');
+
+        //Utility func to retrieve data from the backend->
+        const handleApiPost = async (endpoint, params) => {
+            const result = await axios.post(`${endpoint}`, params, {
+                headers: {
+                'Content-Type': 'application/json',
+                "X-CSRFToken": '{{ csrf_token }}'
+                },
+            });
+
+            return result.data;
+        };
+
+        //Verifying signature. Returns a JWT from Godel on success->
+        const verifySignature = (signature) =>
+        handleApiPost('{% url "core:auth_godel" %}', {
+            signature: signature,
+        });
+
+        //Update the current User model on the backend with the new JWT->
+        const updateUserJWT = (jwt) => 
+        handleApiPost('{% url "core:update_user_jwt" %}', {
+            jwt: jwt,
+        });
+
+        //Connect to Metamask->
+        const connectToMetamask = async () => {
+            const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
+
+            const [accounts, chainId] = await Promise.all([
+                provider.send('eth_requestAccounts', []),
+                provider.send('eth_chainId', []),
+            ]);
+
+            const signer = provider.getSigner();
+            return { signer, chain: chainId, account: accounts[0] };
+        };
+
+        const handleAuth = async () => {
+            // Connect to Metamask
+            try{
+                console.log('Connecting to Metamask...'); 
+                const { signer, chain, account } = await connectToMetamask();
+                console.log("Connected.\naccount: ", account, "chain: ", chain);
+
+                if (!account) {
+                    throw new Error('No account found');
+                }
+                if (!chain) {
+                    throw new Error('No chain found');
+                }
+                const message = '{{message}}';
+                console.log("Sign message- '", message, "'");
+                const signature = await signer.signMessage(message);
+                console.log(`Message signed. Signatue = ${signature}`);
+                const {jwt_token} = await verifySignature(signature);
+                if (jwt_token) {
+                    console.log("Connected to the Golden API!");
+                    await updateUserJWT(jwt_token);
+                    //^url called updates jwt in the current user's user model. Originally, the jwt's presence will be checked for there.
+                    //if an error shows that it's expired or doesn't work for whatever reason, the user will be directed to 
+                    //generate a new one.
+                    location.reload(); //(reload the page for the user's updated JWT to come into effect)
+                }
+                else{
+                alert("authentication error") //Inform the user that authentication with the Golden API was a fail
+                }
+            }
+            catch(err){
+                console.log(err.message);
+            }
+        };
+
+        function init() {
+            window.scrollTo(0, 0);
+            
+            const message = '{{message}}';
+            console.log('Signable message:');
+            console.log(message);
+
+            const validity_result = {{jwt_validity}};
+            //^initial jwt validity checking happens on the backend and is checked before loading the view.
+
+            if(('{{current_user_jwt}}'==='None')||validity_result===false){ //or if jwt is invalid
+                if(validity_result===false){
+                    //send alert stating jwt is invalid or expired
+                    GodelAuthBtn.addEventListener('click', async () => {
+                        handleAuth().catch((error) => console.log(error));
+                        console.log('Checkpoint: User JWT invalid/expired. "Connect to Golden API" button listener added');
+                    });
+                }
+                else{
+                    GodelAuthBtn.addEventListener('click', async () => {
+                        handleAuth().catch((error) => console.log(error));
+                        console.log('Checkpoint: User JWT="None". "Connect to Golden API" button listener added');
+                    });
+                }
+            }
+            else{
+                //enable buttons, disenable the "connect to Golden API button"->
+                GodelAuthBtn.className = 'alert alert-success mt-2';
+                GodelAuthBtn.innerHTML = 'Connected to the Golden API';
+                document.getElementById('UploadButton').className='btn btn-primary btn-block mt-2';
+            }
+        }
+
+        console.log('Javacript loaded');
+        window.addEventListener('load', () => {
+            init();
+            });
+    </script>
+{% endblock script %}

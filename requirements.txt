@@ -1,0 +1,4 @@
+Django==4.1.4
+godel==0.8.0
+requests==2.27.1
+django-bootstrap-v5==1.0.11

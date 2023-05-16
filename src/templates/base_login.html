@@ -1,0 +1,38 @@
+{% load bootstrap5 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    {% load static %} 
+    <link href="{% static 'web3_auth/css/signin.css' %}" rel="stylesheet">   
+    <title>
+        {% block title %}
+            Moralis Auth Django Demo
+        {% endblock title %}
+    </title>
+</head>
+
+<body class="text-center">
+    <form class="form-signin">
+        {% block alert %}
+        {% endblock alert %}
+            <img class="mb-4" src="https://golden.com/static/images/b04063256d0d506a816e.png" alt="" width="72" height="72">
+            <h1 class="h3 mb-3 font-weight-normal">Sign in with Metamask</h1>
+        {% block button %}
+        {% endblock button %}
+            <p class="mt-4 mb-3 text-muted">
+                Welcome to the Golden Dataset Uploader. An open source, no-code solution to bulk upload data to the Golden protocol.
+            </p>
+            <p class="mt-2 mb-3 text-muted">Log in to get started!</p>
+        {% block proceedbutton %}
+        {% endblock proceedbutton %}
+    </form>
+    {% block script %}
+    {% endblock script %}
+</body>
+
+</html>
