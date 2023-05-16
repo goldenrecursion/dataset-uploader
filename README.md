@@ -9,15 +9,15 @@ With recent developments (a Nous Labs spin off from Golden), no-code user data u
 
 ## Screenshots 
 
-![Screenshot1](./images/screen 1.png)
+![Screenshot1](./images/screen1.png)
 
-![Screenshot2](./images/Screen 2.png)
+![Screenshot2](./images/Screen2.png)
 
-![Screenshot3](./images/Screen 3.png)
+![Screenshot3](./images/Screen3.png)
 
-![Screenshot4](./images/Screen 4.png)
+![Screenshot4](./images/Screen4.png)
 
-![Screenshot5](./images/Screen 5.png)
+![Screenshot5](./images/Screen5.png)
 
 ## Set up/Installation
 
