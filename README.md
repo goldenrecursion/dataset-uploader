@@ -7,6 +7,18 @@ Currently, it's a base Django app that allows users to log in with their Metamas
 
 With recent developments (a Nous Labs spin off from Golden), no-code user data upload may not be necessary right now, but maybe this could be repurposed for other needs. 
 
+## Screenshots 
+
+![Screenshot1](./images/screen 1.png)
+
+![Screenshot2](./images/Screen 2.png)
+
+![Screenshot3](./images/Screen 3.png)
+
+![Screenshot4](./images/Screen 4.png)
+
+![Screenshot5](./images/Screen 5.png)
+
 ## Set up/Installation
 
 Some settings in `src/golden_dataset_uploader/settings.py` can be edited as required. 
