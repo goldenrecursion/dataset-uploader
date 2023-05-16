@@ -1,0 +1,28 @@
+{% load bootstrap5 %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {% bootstrap_css %}
+        {% bootstrap_javascript %}
+        {% block head %}
+        {% endblock head %}
+        <title>
+            {% block title %}
+                Base
+            {% endblock title %}
+        </title>
+    </head>
+    <body class="vh-100 py-40" style="text-align: center">
+        {% bootstrap_messages %}
+        {% block navbar %}
+        {% endblock navbar %}
+        <div class="container-fluid h-100 m-0 d-flex justify-content-center align-items-center">
+            {% block content %}
+            {% endblock content %}
+        </div>
+        {% block script %}
+        {% endblock script %}
+    </body>
+</html>
